@@ -1,0 +1,5 @@
+@for (item of todo; track item; let i = $index) {
+    <!-- <p>Задача №{{ i + 1 }}</p>
+    <p>{{ item }}</p> -->
+    <p>{{ todoService.formatTodo(i, item) }}</p>
+}

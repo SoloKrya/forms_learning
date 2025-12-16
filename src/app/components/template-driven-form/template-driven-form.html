@@ -1,0 +1,37 @@
+<h2>Подписка на новости</h2>
+
+    <form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate class="stack">
+
+      <label for="name">Имя</label>
+      <input id="name"
+             name="name"
+             required
+             minlength="2"
+             [(ngModel)]="model.name"
+             (ngModelChange)="onNameChange($event)"
+             #nameCtrl="ngModel">
+
+      @if (nameCtrl.invalid && (nameCtrl.touched || nameCtrl.dirty)) {
+        @if (nameCtrl.errors?.['required']) { <small>Имя обязательно</small> }
+        @if (nameCtrl.errors?.['minlength']) { <small>Минимум 2 символа</small> }
+      }
+
+      <label for="email">Email</label>
+      <input id="email"
+             name="emailControl"
+             type="email"
+             required
+             [(ngModel)]="model.email"
+             #emailCtrl="ngModel">
+
+      @if (emailCtrl.invalid && (emailCtrl.touched || emailCtrl.dirty)) {
+        @if (emailCtrl.errors?.['required']) { <small>Email обязателен</small> }
+        @if (emailCtrl.errors?.['email']) { <small>Некорректный email</small> }
+      }
+
+      <button type="submit" [disabled]="form.invalid">Подписаться</button>
+    </form>
+
+    @if (submitted) {
+      <p>Спасибо, {{ model.name }}! Письмо отправлено на {{ model.email }}.</p>
+    }

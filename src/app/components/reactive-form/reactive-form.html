@@ -1,0 +1,38 @@
+<form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+    <div>
+        <label for="name">Имя</label>
+        <input id="name" formControlName="userName">
+        @if (userForm.controls["userName"].invalid && userForm.controls["userName"].touched) {
+            @if (userForm.controls["userName"].errors?.["required"]) {<p class="error">Не указано имя</p>} <!-- "?." - оператор безопасной навигации -->
+            @if (userForm.controls["userName"].errors?.["noSpaces"]) {<p class="error">Пробел убери, не позорься</p>}
+        }
+    </div>
+
+    <div>
+        <label for="email">Пошта</label>
+        <input id="email" formControlName="userEmail">
+        @if (userForm.controls["userEmail"].invalid && userForm.controls["userEmail"].touched) {<p class="error">Неправильно набран номер</p>}
+    </div>
+
+    <div formGroupName="userPassword">
+        <label for="password">Введите пароль</label>
+        <input id="password" formControlName="password">
+        <label for="confirmPassword">Подтвердите пароль</label>
+        <input id="confirmPassword" formControlName="confirmPassword">
+        @if (userForm.controls["userPassword"].errors?.["matchPassword"]&& userForm.controls["userPassword"].touched) {<p class="error">Неправильно повторен пароль</p>}
+    </div>
+    
+    <div formArrayName="userPhones">
+        <p>телефонные номера</p>
+        @for (control of userForm.controls["userPhones"].controls; track control; let i = $index) {
+            <input [formControlName]="i">
+            @if (control.errors?.["required"] && control.touched) {<p class="error">Введи хотя бы цифру, скряга</p>}
+            <button (click)="removePhone(i)" type="button">Удалить</button>
+        }
+        @if (userForm.controls["userPhones"].errors?.["minPhones"]) {<p class="error">Добавьте хотя бы один номер</p>}
+        <button (click)="addPhone()" type="button">добавить</button>
+        <button (click)="removeAllPhones()" type="button">удалить все</button>
+    </div>
+    <!-- <button [disabled]="userForm.invalid">Сохранить</button> -->
+     <button>Сохранить</button>
+</form>

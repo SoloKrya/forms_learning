@@ -1,0 +1,208 @@
+<form [formGroup]="cartForm" (ngSubmit)="onSubmit()">
+    <button (click)="addDemo()" type="button">Заполнить демо</button>
+    <div formGroupName="customer">
+        <div>
+            <label for="name">Имя покупателя</label>
+            <input id="name" formControlName="name">
+            @if ((cartForm.controls.customer.controls.name.touched || cartForm.controls.customer.controls.name.dirty) && cartForm.controls.customer.controls.name.errors?.["required"] ) {
+                <p class="error">Имя обязательно.</p>
+            }
+            @if ((cartForm.controls.customer.controls.name.touched || cartForm.controls.customer.controls.name.dirty) && cartForm.controls.customer.controls.name.errors?.["noDigits"] ) { <!--есть сомения, нужен ли тут дирти-->
+                <p class="error">Имя не должно содержать цифры.</p>
+            } 
+        </div>
+
+        <div>
+            <label for="email">Email для чека</label>
+            <input id="email" formControlName="email">
+            @if ((cartForm.controls.customer.controls.email.touched || cartForm.controls.customer.controls.email.dirty) && cartForm.controls.customer.controls.email.errors?.["required"] ) {
+                <p class="error">Email обязателен.</p>
+            }
+            @if ((cartForm.controls.customer.controls.email.touched || cartForm.controls.customer.controls.email.dirty) && cartForm.controls.customer.controls.email.errors?.["email"] ) {<!--есть сомения, нужен ли тут дирти-->
+                <p class="error">Некорректный email.</p>
+            }
+            @if ((cartForm.controls.customer.controls.email.touched || cartForm.controls.customer.controls.email.dirty) && cartForm.controls.customer.controls.email.errors?.["noTempDomen"] ) { <!--есть сомения, нужен ли тут дирти-->
+                <p class="error">Email домена временной почты не принимается.</p>
+            } 
+        </div>
+
+        <div>
+            <label for="phone">Телефон для связи</label>
+            <input id="phone" formControlName="phone">
+            @if ((cartForm.controls.customer.controls.phone.touched || cartForm.controls.customer.controls.phone.dirty) && cartForm.controls.customer.controls.phone.errors?.["required"] ) {
+                <p class="error">Телефон обязателен.</p>
+            }
+            @if ((cartForm.controls.customer.controls.phone.touched || cartForm.controls.customer.controls.phone.dirty) && cartForm.controls.customer.controls.phone.errors?.["phoneLike"] ) {
+                <p class="error">Введите реальный номер телефона (цифры, +, -, скобки; не менее 7 знаков).</p>
+            }
+        </div>
+    </div>
+
+    <div formArrayName="items">
+        <button (click)="addItem()" type="button">Добавить товар</button>
+        @for (item of cartForm.controls["items"].controls; track item; let i = $index) {
+            <form [formGroupName]="i">
+                <div>
+                    <label for="sku">Артикул {{i}}</label>
+                    <input id="sku" formControlName="sku">
+                </div>
+
+                <div>
+                    <label for="title">Название</label>
+                    <input id="title" formControlName="title">
+                </div>
+
+                <div>
+                    <label for="price">Цена</label>
+                    <input id="price" formControlName="price">
+                </div>
+
+                <div>
+                    <label for="qty">Количество</label>
+                    <input id="qty" formControlName="qty">
+                </div>
+
+                @if ((item.controls["title"].touched || item.controls["title"].dirty) && item.controls["title"].errors?.["required"] ) {
+                    <p class="error">Название обязательно.</p>
+                }
+                @if ((item.controls["price"].touched || item.controls["price"].dirty) && item.controls["price"].errors?.["required"] ) {
+                    <p class="error">Цена обязательна.</p>
+                }
+                @if ((item.controls["price"].touched || item.controls["price"].dirty) && item.controls["price"].errors?.["positiveNumber"] ) {
+                    <p class="error">Цена должна быть числом ≥ 0.</p>
+                }
+                @if ((item.controls["qty"].touched || item.controls["qty"].dirty) && item.controls["qty"].errors?.["required"] ) {
+                    <p class="error">Количество обязательно.</p>
+                }
+                @if ((item.controls["qty"].touched || item.controls["qty"].dirty) && item.controls["qty"].errors?.["naturalNumber"] ) {
+                    <p class="error">Количество — целое число от 1 и больше.</p>
+                }
+            </form>
+            <button (click)="removeItem(i)" type="button">Удалить товар</button>
+        }
+        @if ((cartForm.controls.items.touched || cartForm.controls.items.dirty) && cartForm.controls.items.errors?.["minItems"] ) {
+            <p class="error">Добавьте хотя бы один товар.</p>
+        }
+        @if ((cartForm.controls.items.touched || cartForm.controls.items.dirty) && cartForm.controls.items.errors?.["uniqueSkus"] ) {
+            <p class="error">Артикулы не должны повторяться.</p>
+        }
+        @if ((cartForm.controls.items.touched || cartForm.controls.items.dirty) && cartForm.controls.items.errors?.["maxTotal"] ) {
+            <p class="error">Сумма заказа превышает лимит 10000.</p>
+        }
+        <button (click)="removeAllItems()" type="button">Очистить корзину</button>
+    </div>
+
+    <div formGroupName="shipping">
+        <fieldset>
+            <label>Способ доставки</label>
+            @for (m of methods; track m) {
+                <label>
+                    <input id="method" formControlName="method" type="radio" [value]="m" (change)="updateValidators()"> <!-- тут я тоже ничего не понимаю -->
+                    {{ m }}
+                </label>
+            }
+        </fieldset>
+
+        @if (cartForm.controls.shipping.controls.method.value === 'courier') {
+            <div formGroupName="address">
+                <div>
+                    <label for="city">Город</label>
+                    <input id="city" formControlName="city">
+                </div>
+                @if ((cartForm.controls.shipping.controls.address.controls.city.touched || cartForm.controls.shipping.controls.address.controls.city.dirty) && cartForm.controls.shipping.controls.address.controls.city.errors?.["required"] ) {
+                    <p class="error">Город обязателен.</p>
+                }
+
+                <div>
+                    <label for="street">Улица</label>
+                    <input id="street" formControlName="street">
+                </div>
+                @if ((cartForm.controls.shipping.controls.address.controls.street.touched || cartForm.controls.shipping.controls.address.controls.street.dirty) && cartForm.controls.shipping.controls.address.controls.street.errors?.["required"] ) {
+                    <p class="error">Улица обязательна.</p>
+                }
+
+                <div>
+                    <label for="zip">Почтовый индекс</label>
+                    <input id="zip" formControlName="zip">
+                </div>
+                @if ((cartForm.controls.shipping.controls.address.controls.zip.touched || cartForm.controls.shipping.controls.address.controls.zip.dirty) && cartForm.controls.shipping.controls.address.controls.zip.errors?.["required"] ) {
+                    <p class="error">Индекс обязателен.</p>
+                }
+                @if ((cartForm.controls.shipping.controls.address.controls.zip.touched || cartForm.controls.shipping.controls.address.controls.zip.dirty) && cartForm.controls.shipping.controls.address.controls.zip.errors?.["zipFormat"] ) {
+                    <p class="error">Индекс имеет неверный формат.</p>
+        }
+            </div>
+        }
+
+        @if (cartForm.controls.shipping.controls.method.value === 'pickup') {
+            <div>
+                <label for="pickupPoint">Пункт самовывоза</label>
+                <input id="pickupPoint" formControlName="pickupPoint">
+            </div>
+            @if ((cartForm.controls.shipping.controls.pickupPoint.touched || cartForm.controls.shipping.controls.pickupPoint.dirty) && cartForm.controls.shipping.controls.pickupPoint.errors?.["required"] ) {
+                <p class="error">Укажите пункт самовывоза.</p>
+            }
+        }
+
+        <!-- Я почему-то тут условие ввел какое-то зачем-то -->
+        <!-- @if (cartForm.controls.shipping.controls.method.value !== null) { -->
+            <div>
+                <label for="date">Дата доставки</label>
+                <input id="date" formControlName="date">
+            </div>
+        <!-- } -->
+            @if ((cartForm.controls.shipping.controls.date.touched || cartForm.controls.shipping.controls.date.dirty) && cartForm.controls.shipping.controls.date.errors?.["required"] ) {
+                <p class="error">Укажите дату доставки.</p>
+            }
+            @if ((cartForm.controls.shipping.controls.date.touched || cartForm.controls.shipping.controls.date.dirty) && cartForm.controls.shipping.controls.date.errors?.["dateWithin"] ) {
+                <p class="error">Дата должна быть в диапазоне от +3 до +14 дней.</p>
+            }
+            @if ((cartForm.controls.shipping.controls.date.touched || cartForm.controls.shipping.controls.date.dirty) && cartForm.controls.shipping.controls.date.errors?.["notWeekend"] ) {
+                <p class="error">Доставка в выходные недоступна.</p>
+            }
+            @if ((cartForm.controls.shipping.controls.date.touched || cartForm.controls.shipping.controls.date.dirty) && cartForm.controls.shipping.controls.date.errors?.["dateFormat"] ) {
+                <p class="error">Введите корректную дату.</p>
+            }
+
+    </div>
+        
+    <div formGroupName="payment">
+        <div>
+            <label for="cardNumber">Номер карты</label>
+            <input id="cardNumber" formControlName="cardNumber">
+        </div>
+        
+        <div>
+            <label for="cardHolder">Держатель</label>
+            <input id="cardHolder" formControlName="cardHolder">
+        </div>
+
+        <div>
+            <label for="expiry">Срок действия карты</label>
+            <input id="expiry" formControlName="expiry">
+        </div>
+
+        <div>
+            <label for="cvv">cvv</label>
+            <input id="cvv" formControlName="cvv">
+        </div>
+    </div>
+
+    <div>
+        <label for="promo">Промокод</label>
+        <input id="promo" formControlName="promo">
+    </div>
+
+    <div>
+        <label for="agree">Согласие с условиями</label>
+        <input id="agree" formControlName="agree" type="checkbox">
+    </div>
+
+    <div>
+        <button (click)="saveCartValues()" type="button">Сохранить значения</button>
+        <button (click)="restoreCartValues()" type="button">Восстановить значения</button>
+    </div>
+    
+    <button (click)="removeCartValues()" type="button">Сбросить</button>
+    <button>submit</button>
+</form>
